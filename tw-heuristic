@@ -1,0 +1,15 @@
+#! /bin/bash
+
+# Reset getopts.
+OPTIND=1
+seed=""
+
+while getopts ":s:" opt; do
+  case "$opt" in
+    s)
+      seed=$OPTARG
+      ;;
+  esac
+done
+
+java -Xmx10g Main -s $seed
