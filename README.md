@@ -7,6 +7,7 @@ This source code is distributed under the open source [MIT](https://opensource.o
 ## Running the code
 
 1) Compile with `make`.
+
 2) Run the code by using the `tw-heuristic` script (may need to `chmod` beforehand to give executable permissions).
 
 This script accepts one argument.
