@@ -33,4 +33,14 @@ This will output a tree decomposition.
     2 5
     4 5
 
+4) At any time you can send the script a UNIX single to get a status update. On `SIGUSR1`, the process will output the size of the largest bag in the best tree decomposition found so far. This can be triggered with
+
+    kill -SIGUSR1 [pid]
+
+where `[pid]` is the pid of the script `tw-heuristic` (not the Java process running in the background).
+
+Similarly, you can terminate the program and immediately print out the best tree decomposition found by sending a `SIGTERM` with
+
+    kill -SIGTERM [pid]
+
 Note: Requires Java 7 or higher.

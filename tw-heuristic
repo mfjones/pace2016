@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # Reset getopts.
 OPTIND=1
@@ -12,4 +12,20 @@ while getopts ":s:" opt; do
   esac
 done
 
-java -Xmx10g Main -s $seed
+cat | java -Xmx10g Main -s $seed &
+
+PID=$!
+
+trap "kill -SIGUSR2 $PID" SIGUSR1
+trap "kill -SIGTERM $PID" SIGTERM
+trap "kill -SIGKILL -- -$PID &> /dev/null" EXIT
+
+while :
+do
+  # Wait for child process, signals interrupt this!
+  wait $PID
+
+  # If child process is no longer active, abort.
+  kill -0 $PID 2> /dev/null || break
+done
+

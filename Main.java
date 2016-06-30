@@ -4,6 +4,8 @@ import heuristics.Turbocharge;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 public class Main {
   public static void main(String[] args) {
@@ -18,7 +20,7 @@ public class Main {
     Graph G = null;
     Scanner sc = new Scanner(System.in);
     boolean foundStartOfFile = false;
-    int n;
+    int n = 0;
 
     while (sc.hasNextLine()) {
       String line = sc.nextLine();
@@ -38,38 +40,54 @@ public class Main {
       }
     }
 
-    // Run the turbocharge algorithm.
-    Turbocharge t;
+    final int numVertices = n;
+    final Turbocharge t;
     if (seed != null)
       t = new Turbocharge(seed);
     else
       t = new Turbocharge();
 
+    // Handle SIGTERM.
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override
+      public void run() {
+        TreeGraph tree = t.bestTreeSoFar();
+        printTreeGraph(numVertices, tree);
+      }
+    });
+
+    // Handle SIGUSR2.
+    Signal.handle(new Signal("USR2"), new SignalHandler () {
+      public void handle(Signal sig) {
+        System.out.println(t.bestTreeSoFar().width() + 1);
+      }
+    });
+
+    // Run the turbocharge algorithm.
     TreeGraph tree = t.binaryTurbocharge(G);
+  }
+
+  public static void printTreeGraph(int numVertices, TreeGraph T) {
     // If there are less than n - 1 edges (where n is the size of the tree
     // decomposition), find all connected components in the forest and add
     // arbitrary edges between the components to form a fully connected tree.
-    if (tree.edges() < tree.size() - 1) {
-      ArrayList<ArrayList<TreeVertex>> components = tree.findComponents();
+    if (T.edges() < T.size() - 1) {
+      ArrayList<ArrayList<TreeVertex>> components = T.findComponents();
       // Pick one component as the "root", add an arbitrary edge from each
       // other component to the root.
       TreeVertex root = components.get(0).get(0);
       for (int i = 1; i < components.size(); i++) {
-        tree.addEdge(components.get(i).get(0), root);
+        T.addEdge(components.get(i).get(0), root);
       }
     }
 
-    printTreeGraph(G, tree);
-  }
-
-  public static void printTreeGraph(Graph G, TreeGraph T) {
     HashMap<Integer, TreeVertex> indexToVertex =
         new HashMap<Integer, TreeVertex>();
     // Print out the size of the tree and graph.
     System.out.printf("s td %d %d %d\n",
         T.size(),
         T.width() + 1,
-        G.size());
+        numVertices);
 
     // Print out all of the bags.
     for (int i = 0; i < T.size(); i++) {

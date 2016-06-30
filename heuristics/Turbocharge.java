@@ -20,6 +20,10 @@ public class Turbocharge {
   private static final boolean DEBUG = false;
   private static final int L = 8;
 
+  private TreeGraph bestTree;
+  private TreeGraph minDegreeTree;
+  private TreeGraph minFillTree;
+
   public int maxBacktrack;
 
   public Turbocharge() {
@@ -29,10 +33,34 @@ public class Turbocharge {
   public Turbocharge(long seed) {
     this.seed = seed;
     this.maxBacktrack = -1;
+    this.bestTree = null;
+    this.minDegreeTree = null;
+    this.minFillTree = null;
   }
 
   public long getSeed() {
     return this.seed;
+  }
+
+  /**
+   * @return Returns the best tree found so far during an execution
+   * binaryTurboCharge.
+   */
+  public TreeGraph bestTreeSoFar() {
+    if (this.bestTree != null) {
+      return this.bestTree;
+    } else if (this.minDegreeTree != null && this.minFillTree != null) {
+      if (this.minDegreeTree.width() <= this.minFillTree.width()) {
+        return this.minDegreeTree;
+      }
+      return this.minFillTree;
+    } else if (this.minDegreeTree != null || this.minFillTree != null) {
+      if (this.minDegreeTree != null) {
+        return this.minDegreeTree;
+      }
+      return this.minFillTree;
+    }
+    return new TreeGraph();
   }
 
   /**
@@ -58,7 +86,6 @@ public class Turbocharge {
       System.out.println("Running min degree " + NUM_GREEDY_CALLS + " time(s)");
     GreedyCriteria minDegree = new GreedyDegree(random, this.seed);
     int minDegreeTW = -1;
-    TreeGraph minDegreeTree = null;
     int[] minDegreePermutation = new int[G.size()];
     for (int i = 1; i <= NUM_GREEDY_CALLS; i++) {
       ArrayList<Integer> degreeOrdering =
@@ -68,7 +95,7 @@ public class Turbocharge {
       int width = tree.width();
       if (width < minDegreeTW || minDegreeTW < 0) {
         minDegreeTW = width;
-        minDegreeTree = tree;
+        this.minDegreeTree = tree;
         System.arraycopy(G.permutation, 0,
             minDegreePermutation, 0, G.permutation.length);
       }
@@ -80,7 +107,6 @@ public class Turbocharge {
       System.out.println("Running min fill " + NUM_GREEDY_CALLS + " time(s)");
     GreedyCriteria minFill = new GreedyFillIn(random, this.seed);
     int minFillTW = -1;
-    TreeGraph minFillTree = null;
     int[] minFillPermutation = new int[G.size()];
     for (int i = 1; i <= NUM_GREEDY_CALLS; i++) {
       ArrayList<Integer> fillOrdering =
@@ -90,7 +116,7 @@ public class Turbocharge {
       int width = tree.width();
       if (width < minFillTW || minFillTW < 0) {
         minFillTW = width;
-        minFillTree = tree;
+        this.minFillTree = tree;
         System.arraycopy(G.permutation, 0,
             minFillPermutation, 0, G.permutation.length);
       }
@@ -99,19 +125,18 @@ public class Turbocharge {
 
     // Determine the best algorithm to use, breaking ties in minDegrees
     // favour because it's faster.
-    TreeGraph bestTree;
     GreedyCriteria alg;
     int k;
     if (minDegreeTW <= minFillTW) {
       k = minDegreeTW;
       alg = minDegree;
-      bestTree = minDegreeTree;
+      this.bestTree = this.minDegreeTree;
       System.arraycopy(minDegreePermutation, 0,
           G.permutation, 0, minDegreePermutation.length);
     } else {
       k = minFillTW;
       alg = minFill;
-      bestTree = minFillTree;
+      this.bestTree = this.minFillTree;
       System.arraycopy(minFillPermutation, 0,
           G.permutation, 0, minFillPermutation.length);
     }
@@ -122,7 +147,7 @@ public class Turbocharge {
 
     // We cannot do better than this.
     if (bestTW == 1) {
-      return bestTree;
+      return this.bestTree;
     }
 
     // If the interval [min, max] is non-existent, try k - 1, k - 2, etc.
@@ -138,7 +163,7 @@ public class Turbocharge {
           TreeGraph T = ConstructTree.orderingToTreeGraph(G, ordering);
           if (T.width() < bestTW) {
             bestTW = T.width();
-            bestTree = T;
+            this.bestTree = T;
           }
         } else {
           break;
@@ -180,7 +205,7 @@ public class Turbocharge {
           TreeGraph T = ConstructTree.orderingToTreeGraph(G, ordering);
           if (T.width() < bestTW) {
             bestTW = T.width();
-            bestTree = T;
+            this.bestTree = T;
             decreaseTW = true;
           }
         }
@@ -197,7 +222,7 @@ public class Turbocharge {
 
     if (DEBUG) System.out.println("Found tree width: " + bestTW);
 
-    return bestTree;
+    return this.bestTree;
   }
 
   public static double roundToHalf(double d) {
