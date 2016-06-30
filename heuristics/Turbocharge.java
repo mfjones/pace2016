@@ -2,6 +2,7 @@ package heuristics;
 
 import graph.Graph;
 import graph.TreeGraph;
+import graph.TreeVertex;
 import heuristics.greedy.Greedy;
 import heuristics.greedy.GreedyCriteria;
 import heuristics.greedy.GreedyDegree;
@@ -23,19 +24,31 @@ public class Turbocharge {
   private TreeGraph bestTree;
   private TreeGraph minDegreeTree;
   private TreeGraph minFillTree;
+  private TreeGraph singleNodeTree;
 
   public int maxBacktrack;
 
-  public Turbocharge() {
-    this(new Random().nextLong());
+  public Turbocharge(int numVertices) {
+    this(new Random().nextLong(), numVertices);
   }
 
-  public Turbocharge(long seed) {
+  public Turbocharge(long seed, int numVertices) {
     this.seed = seed;
     this.maxBacktrack = -1;
     this.bestTree = null;
     this.minDegreeTree = null;
     this.minFillTree = null;
+
+    // Construct a tree decomposition with a single vertex. This means every
+    // vertex in the graph G is in a single bag. This tree is only ever used
+    // if a SIGUSR1 or SIGTERM signal is sent before any reasonable tree
+    // decomposition is constructed.
+    this.singleNodeTree = new TreeGraph();
+    TreeVertex singleNode = new TreeVertex("0", -1);
+    for (int i = 0; i < numVertices; i++) {
+      singleNode.addToBag(i);
+    }
+    this.singleNodeTree.addTreeVertex(singleNode);
   }
 
   public long getSeed() {
@@ -60,7 +73,7 @@ public class Turbocharge {
       }
       return this.minFillTree;
     }
-    return new TreeGraph();
+    return this.singleNodeTree;
   }
 
   /**

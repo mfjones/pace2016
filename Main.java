@@ -43,9 +43,9 @@ public class Main {
     final int numVertices = n;
     final Turbocharge t;
     if (seed != null)
-      t = new Turbocharge(seed);
+      t = new Turbocharge(seed, numVertices);
     else
-      t = new Turbocharge();
+      t = new Turbocharge(numVertices);
 
     // Handle SIGTERM.
     Runtime.getRuntime().addShutdownHook(new Thread() {
