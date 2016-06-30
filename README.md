@@ -33,7 +33,7 @@ This will output a tree decomposition.
     2 5
     4 5
 
-4) At any time you can send the script a UNIX single to get a status update. On `SIGUSR1`, the process will output the size of the largest bag in the best tree decomposition found so far. This can be triggered with
+4) At any time you can send the script a UNIX signal to get a status update. On `SIGUSR1`, the process will output the size of the largest bag in the best tree decomposition found so far. This can be triggered with
 
     kill -SIGUSR1 [pid]
 
