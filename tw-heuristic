@@ -46,7 +46,6 @@ trap "echo $nodes" SIGUSR1
 # Pass the input from shm to Java.
 java -Xmx10g Main -s $seed < $tmp &
 PID=$!
-rm $tmp
 
 trivialTree() {
   kill -SIGKILL $PID &> /dev/null
@@ -66,7 +65,7 @@ done
 # The actual traps, forward the signals to the JVM.
 trap "kill -SIGUSR2 $PID" SIGUSR1
 trap "kill -SIGTERM $PID" SIGTERM
-trap "kill -SIGKILL -- -$PID &> /dev/null" EXIT
+trap "kill -SIGKILL -- -$PID &> /dev/null; rm -f $tmp" EXIT
 
 while :
 do
