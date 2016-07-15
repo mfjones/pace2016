@@ -35,6 +35,7 @@ done
 shmdir="/dev/shm/"
 name="input_tmpfile"
 tmp="$shmdir$name"_"$$"
+trap 'rm -f $tmp' EXIT
 cat > $tmp
 
 # Temporary traps while we wait for Java, output a tree decomposition
@@ -45,6 +46,7 @@ trap "echo $nodes" SIGUSR1
 # Pass the input from shm to Java.
 java -Xmx10g Main -s $seed < $tmp &
 PID=$!
+rm $tmp
 
 trivialTree() {
   kill -SIGKILL $PID &> /dev/null
