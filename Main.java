@@ -1,11 +1,10 @@
 import graph.*;
 import heuristics.Turbocharge;
 
+import java.lang.StringBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 public class Main {
   public static void main(String[] args) {
@@ -56,13 +55,6 @@ public class Main {
       }
     });
 
-    // Handle SIGUSR2.
-    Signal.handle(new Signal("USR2"), new SignalHandler () {
-      public void handle(Signal sig) {
-        System.out.println(t.bestTreeSoFar().width() + 1);
-      }
-    });
-
     // Run the turbocharge algorithm.
     TreeGraph tree = t.binaryTurbocharge(G);
   }
@@ -92,12 +84,13 @@ public class Main {
     // Print out all of the bags.
     for (int i = 0; i < T.size(); i++) {
       TreeVertex t = T.getTreeVertices().get(i);
-      String line = String.valueOf(i + 1);
+      // Use StringBuilder here, as may have long strings to print.
+      StringBuilder line = new StringBuilder(String.valueOf(i + 1));
       for (int v : t.bag()) {
-        line += " " + Integer.toString(v + 1);
+        line.append(" " + Integer.toString(v + 1));
       }
       indexToVertex.put(i + 1, t);
-      System.out.printf("b %s\n", line);
+      System.out.printf("b %s\n", line.toString());
     }
 
     // Print out the edges.

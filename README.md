@@ -16,12 +16,19 @@ This script accepts one argument.
 
 where `[seed]` is a given seed. If nothing is given, a seed will be randomly generated and used. All instance data is passed via `stdin`, and output is printed to `stdout`.
 
+During processing, whenever a *better* tree decomposition is found, a *status update* will be printed in the form of
+
+    c status [width + 1] [current time]
+
+where `[width + 1]` is the width of the best tree decomposition found so far plus one, and `[current time]` is the current Unix time in milliseconds.
+
 3) Test it with an example.
 
     ./tw-heuristic -s 4321 < example.gr
 
 This will output a tree decomposition.
 
+    c status 2 1469500579541
     s td 5 2 5
     b 1 2 1
     b 2 3 2
@@ -33,14 +40,10 @@ This will output a tree decomposition.
     2 5
     4 5
 
-4) At any time you can send the script a UNIX signal to get a status update. On `SIGUSR1`, the process will output the size of the largest bag in the best tree decomposition found so far. This can be triggered with
-
-    kill -SIGUSR1 [pid]
-
-where `[pid]` is the pid of the script `tw-heuristic` (not the Java process running in the background).
-
-Similarly, you can terminate the program and immediately print out the best tree decomposition found by sending a `SIGTERM` with
+4) At any time you can send the script the UNIX signal SIGTERM in order to terminate the program and immediately print out the best tree decomposition found. This can be triggered with
 
     kill -SIGTERM [pid]
+
+where `[pid]` is the pid of the script `tw-heuristic` (not the Java process running in the background).
 
 Note: Requires Java 7 or higher.

@@ -76,6 +76,12 @@ public class Turbocharge {
     return this.singleNodeTree;
   }
 
+  public static void printStatusUpdate(TreeGraph T) {
+    System.out.printf("c status %d %d\n",
+        T.width() + 1,
+        System.currentTimeMillis());
+  }
+
   /**
    * Runs the turbocharge algorithm on a Graph, using a biased binary search
    * to find the best value of k. Makes a call to both greedy min degree and
@@ -98,7 +104,7 @@ public class Turbocharge {
     if (DEBUG)
       System.out.println("Running min degree " + NUM_GREEDY_CALLS + " time(s)");
     GreedyCriteria minDegree = new GreedyDegree(random, this.seed);
-    int minDegreeTW = -1;
+    int minDegreeTW = G.size() - 1;
     int[] minDegreePermutation = new int[G.size()];
     for (int i = 1; i <= NUM_GREEDY_CALLS; i++) {
       ArrayList<Integer> degreeOrdering =
@@ -106,11 +112,12 @@ public class Turbocharge {
       TreeGraph tree =
           ConstructTree.orderingToTreeGraph(G, degreeOrdering);
       int width = tree.width();
-      if (width < minDegreeTW || minDegreeTW < 0) {
+      if (width < minDegreeTW) {
         minDegreeTW = width;
         this.minDegreeTree = tree;
         System.arraycopy(G.permutation, 0,
             minDegreePermutation, 0, G.permutation.length);
+        printStatusUpdate(this.minDegreeTree);
       }
       if (DEBUG) System.out.println("==> " + width);
     }
@@ -119,7 +126,7 @@ public class Turbocharge {
     if (DEBUG)
       System.out.println("Running min fill " + NUM_GREEDY_CALLS + " time(s)");
     GreedyCriteria minFill = new GreedyFillIn(random, this.seed);
-    int minFillTW = -1;
+    int minFillTW = G.size() - 1;
     int[] minFillPermutation = new int[G.size()];
     for (int i = 1; i <= NUM_GREEDY_CALLS; i++) {
       ArrayList<Integer> fillOrdering =
@@ -127,11 +134,15 @@ public class Turbocharge {
       TreeGraph tree =
           ConstructTree.orderingToTreeGraph(G, fillOrdering);
       int width = tree.width();
-      if (width < minFillTW || minFillTW < 0) {
+      if (width < minFillTW) {
         minFillTW = width;
         this.minFillTree = tree;
         System.arraycopy(G.permutation, 0,
             minFillPermutation, 0, G.permutation.length);
+
+        if (minFillTW < minDegreeTW) {
+          printStatusUpdate(this.minFillTree);
+        }
       }
       if (DEBUG) System.out.println("==> " + width);
     }
@@ -177,6 +188,7 @@ public class Turbocharge {
           if (T.width() < bestTW) {
             bestTW = T.width();
             this.bestTree = T;
+            printStatusUpdate(this.bestTree);
           }
         } else {
           break;
@@ -220,6 +232,7 @@ public class Turbocharge {
             bestTW = T.width();
             this.bestTree = T;
             decreaseTW = true;
+            printStatusUpdate(this.bestTree);
           }
         }
 
